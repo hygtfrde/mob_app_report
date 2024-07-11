@@ -1,0 +1,8 @@
+pyarrow
+fastparquet
+pandas
+numpy
+scipy
+seaborn
+matplotlib
+openpyxl
