@@ -1,5 +1,7 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
+
 
 
 def load_dataset(dataset):
@@ -12,19 +14,48 @@ def load_dataset(dataset):
         return None
 
 
+report_dir = 'report_plots'
+if not os.path.exists(report_dir):
+    os.makedirs(report_dir)
 
 
 def most_popular_apps(dataset, paid=True):
-    # Get all categories in 'Category' column, return a list of them
-
-    return
-
-
-def most_popular_genres(dataset, by='Installs', paid=True):
     if paid:
-        dataset = dataset[dataset['Type'] == 'Paid']
-    genre_popularity = dataset.groupby('Genres')[by].sum().sort_values(ascending=False)
-    return genre_popularity.head(10)
+        filtered_data = dataset[dataset['Type'] == 'Paid']
+    else:
+        filtered_data = dataset[dataset['Type'] == 'Free']
+    filtered_data = filtered_data.dropna(subset=['Rating'])
+    idx_max_ratings = filtered_data.groupby('Category')['Rating'].idxmax()
+    popular_apps = filtered_data.loc[idx_max_ratings]
+    for _, row in popular_apps.iterrows():
+        print(f"Category: {row['Category']}, Highest Rated App: {row['App']}, Rating: {row['Rating']}")
+    
+    return popular_apps
+
+
+def most_popular_genres(dataset, paid=True):
+    if paid:
+        filtered_data = dataset[dataset['Type'] == 'Paid']
+    else:
+        filtered_data = dataset[dataset['Type'] == 'Free']
+    filtered_data = filtered_data.dropna(subset=['Installs'])
+    filtered_data['Installs'] = filtered_data['Installs'].str.replace('[^\d]', '', regex=True).astype(int)
+    installs_per_genre = filtered_data.groupby('Genres')['Installs'].sum().sort_values(ascending=False)
+    installs_list = installs_per_genre.reset_index().values.tolist()
+    genres_with_numbers = {f"{i+1}": genre for i, genre in enumerate(installs_per_genre.index)}
+    
+    plt.figure(figsize=(10, 7))
+    plt.pie(installs_per_genre, labels=genres_with_numbers.keys(), autopct='%1.1f%%', startangle=140)
+    plt.title('Total Installs per Genre')
+    plt.axis('equal')
+    legend_labels = [f"{num}: {genre}" for num, genre in genres_with_numbers.items()]
+    plt.legend(legend_labels, title="Genres", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.show()
+    
+    for label in legend_labels:
+        print(label)
+    
+    return installs_list
 
 
 def total_installs_per_category_array(dataset, paid=True):
@@ -60,8 +91,15 @@ def most_expensive_apps_per_category(dataset, paid=True):
     return most_expensive_apps
 
 
+# MAIN
 def main():
     csv_files = ['archive/googleplaystore.csv', 'archive/googleplaystore_user_reviews.csv']
     df = load_dataset(csv_files[0])
     
     most_popular_apps(df, True)
+    
+    most_popular_genres(df, True)
+
+
+if __name__ == '__main__':
+    main()
