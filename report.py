@@ -170,15 +170,15 @@ def main():
     csv_files = ['archive/googleplaystore.csv', 'archive/googleplaystore_user_reviews.csv']
     df = load_dataset(csv_files[0])
     
-    # most_popular_apps(df, True)
+    most_popular_apps(df, True)
     
-    # most_popular_genres(df, True)
+    most_popular_genres(df, True)
     
-    # total_installs_per_category_array(df, True)
+    total_installs_per_category_array(df, True)
     
-    # total_installs_per_category_chart(df, True)
+    total_installs_per_category_chart(df, True)
 
-    # mean_price_per_category_chart(df, True)
+    mean_price_per_category_chart(df, True)
     
     most_expensive_apps_per_category(df, True)
 
