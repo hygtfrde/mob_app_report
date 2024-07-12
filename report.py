@@ -38,23 +38,44 @@ def most_popular_genres(dataset, paid=True):
         filtered_data = dataset[dataset['Type'] == 'Paid']
     else:
         filtered_data = dataset[dataset['Type'] == 'Free']
+        
     filtered_data = filtered_data.dropna(subset=['Installs'])
     filtered_data['Installs'] = filtered_data['Installs'].str.replace('[^\d]', '', regex=True).astype(int)
-    installs_per_genre = filtered_data.groupby('Genres')['Installs'].sum().sort_values(ascending=False)
-    installs_list = installs_per_genre.reset_index().values.tolist()
-    genres_with_numbers = {f"{i+1}": genre for i, genre in enumerate(installs_per_genre.index)}
     
-    plt.figure(figsize=(10, 7))
-    plt.pie(installs_per_genre, labels=genres_with_numbers.keys(), autopct='%1.1f%%', startangle=140)
+    installs_per_genre = filtered_data.groupby('Genres')['Installs'].sum().sort_values(ascending=False)
+    total_installs = installs_per_genre.sum()
+    installs_list = installs_per_genre.reset_index().values.tolist()
+    
+    genres_with_numbers = {f"{i+1}": genre for i, genre in enumerate(installs_per_genre.index)}
+    percentages = (installs_per_genre / total_installs) * 100
+
+    plt.figure(figsize=(7, 5))
+
+    def autopct_generator(pct):
+        return ('%1.1f%%' % pct) if pct >= 5 else ''
+    
+    wedges, texts, autotexts = plt.pie(installs_per_genre, labels=genres_with_numbers.keys(), autopct=autopct_generator, startangle=140)
+    
+    for autotext in autotexts:
+        autotext.set_color('white')
+
     plt.title('Total Installs per Genre')
     plt.axis('equal')
-    legend_labels = [f"{num}: {genre}" for num, genre in genres_with_numbers.items()]
-    plt.legend(legend_labels, title="Genres", bbox_to_anchor=(1.05, 1), loc='upper left')
+
+    legend_labels = []
+    for i, (num, genre) in enumerate(genres_with_numbers.items()):
+        pct = percentages[i]
+        if pct < 5:
+            legend_labels.append(f"{num}: {genre} ({pct:.1f}%)")
+
+    plt.legend(legend_labels, title="Genres (<5%)", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(os.path.join(report_dir, f'installs_per_genre.png'))
     plt.show()
-    
+
     for label in legend_labels:
         print(label)
-    
+
     return installs_list
 
 
