@@ -17,16 +17,20 @@
 - Visualizations: Various plots as specified (bar diagram, pie diagram, bar and pie charts).
 
 ## Installation
-TODO - How to install your project? npm install? make? make re?
+Create a VENV or Container, then use Pip to install the requirements.
 
 ## Usage
-TODO - How does it work?
+Run the raw Python code with
 ```
-./my_project argument1 argument2
+python mobapp_studio.py
+```
+And generate the reports by running
+```
+python report.py
 ```
 
 ### The Core Team
 
 
 <span><i>Made at <a href='https://qwasar.io'>Qwasar SV -- Software Engineering School</a></i></span>
-<span><img alt='Qwasar SV -- Software Engineering School's Logo' src='https://storage.googleapis.com/qwasar-public/qwasar-logo_50x50.png' width='20px' /></span>
+<span><img alt="Qwasar SV -- Software Engineering School's Logo" src="https://storage.googleapis.com/qwasar-public/qwasar-logo_50x50.png" width="20px" /></span>
