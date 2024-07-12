@@ -99,27 +99,69 @@ def total_installs_per_category_array(dataset, paid=True):
 
 def total_installs_per_category_chart(dataset, paid=True):
     installs_per_category = total_installs_per_category_array(dataset, paid)
+    categories = [item[0] for item in installs_per_category]
+    total_installs = [item[1] for item in installs_per_category]
     plt.figure(figsize=(10, 6))
-    installs_per_category.plot(kind='bar', color='skyblue')
+    plt.bar(categories, total_installs, color='skyblue')
     plt.title('Total Installs per Category')
     plt.xlabel('Category')
     plt.ylabel('Total Installs')
     plt.xticks(rotation=45)
     plt.tight_layout()
+    plt.savefig(f'{report_dir}/total_installs_per_category_chart.png')
     plt.show()
+
+
+def clean_price(price):
+    try:
+        return float(price.strip('$'))  # Assuming prices are formatted as '$X.XX'
+    except ValueError:
+        return None
 
 
 def mean_price_per_category(dataset, paid=True):
     if paid:
         dataset = dataset[dataset['Type'] == 'Paid']
+    else:
+        dataset = dataset[dataset['Type'] == 'Free']
+    
+    # Clean up 'Price' column
+    dataset['Price'] = dataset['Price'].apply(clean_price)
+    
+    # Filter out rows where 'Price' couldn't be converted to numeric
+    dataset = dataset.dropna(subset=['Price'])
+    
+    # Group by 'Category' and calculate mean price
     mean_price = dataset.groupby('Category')['Price'].mean().sort_values(ascending=False)
     return mean_price
+
+def mean_price_per_category_chart(dataset, paid=True):
+    mean_prices = mean_price_per_category(dataset, paid)
+    categories = mean_prices.index
+    prices = mean_prices.values
+    
+    plt.figure(figsize=(10, 6))
+    plt.bar(categories, prices, color='skyblue')
+    plt.title('Mean Price per Category')
+    plt.xlabel('Category')
+    plt.ylabel('Mean Price')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(f'{report_dir}/mean_price_per_category_chart.png')
+    plt.show()
 
 
 def most_expensive_apps_per_category(dataset, paid=True):
     if paid:
         dataset = dataset[dataset['Type'] == 'Paid']
-    most_expensive_apps = dataset.groupby('Category').apply(lambda x: x.loc[x['Price'].idxmax()])[['App', 'Price']]
+    else:
+        dataset = dataset[dataset['Type'] == 'Free']
+    dataset['Price'] = dataset['Price'].apply(clean_price)
+    dataset = dataset.dropna(subset=['Price'])
+    idx_max_prices = dataset.groupby('Category')['Price'].idxmax()
+    most_expensive_apps = dataset.loc[idx_max_prices]
+    most_expensive_apps.to_excel(f'{report_dir}/most_expensive_apps_per_category.xlsx', index=False)
+    
     return most_expensive_apps
 
 
@@ -134,8 +176,11 @@ def main():
     
     # total_installs_per_category_array(df, True)
     
-    total_installs_per_category_chart(df, True)
+    # total_installs_per_category_chart(df, True)
 
+    # mean_price_per_category_chart(df, True)
+    
+    most_expensive_apps_per_category(df, True)
 
 
 if __name__ == '__main__':
