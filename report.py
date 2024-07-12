@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from matplotlib.gridspec import GridSpec
 
 
 def load_dataset(dataset):
@@ -49,13 +49,14 @@ def most_popular_genres(dataset, paid=True):
     genres_with_numbers = {f"{i+1}": genre for i, genre in enumerate(installs_per_genre.index)}
     percentages = (installs_per_genre / total_installs) * 100
 
-    plt.figure(figsize=(7, 5))
+    plt.figure(figsize=(10, 7))
 
     def autopct_generator(pct):
         return ('%1.1f%%' % pct) if pct >= 5 else ''
     
     wedges, texts, autotexts = plt.pie(installs_per_genre, labels=genres_with_numbers.keys(), autopct=autopct_generator, startangle=140)
     
+    # Customizing text color
     for autotext in autotexts:
         autotext.set_color('white')
 
@@ -68,16 +69,15 @@ def most_popular_genres(dataset, paid=True):
         if pct < 5:
             legend_labels.append(f"{num}: {genre} ({pct:.1f}%)")
 
-    plt.legend(legend_labels, title="Genres (<5%)", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.legend(legend_labels, title="Genres (<5%)", loc='upper right', bbox_to_anchor=(1.1, 1))
     plt.tight_layout()
-    plt.savefig(os.path.join(report_dir, f'installs_per_genre.png'))
+    plt.savefig('total_installs_per_genre.png', bbox_inches='tight')
     plt.show()
 
     for label in legend_labels:
         print(label)
 
     return installs_list
-
 
 def total_installs_per_category_array(dataset, paid=True):
     if paid:
